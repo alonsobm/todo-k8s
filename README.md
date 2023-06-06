@@ -33,6 +33,10 @@ to pay for a new domain, I just created a new "A" DNS record for that domain, wh
 message from the pods under the kubernetes Service (I created a Replica Set with 2 pods). I'm not using TLS for that domain, so connection is not encrypted. This is because 
 setting up https in kubernetes would have involved reading more documentation and troubleshot kubernetes networking layers. 
 
+![digitalocean](img/img.png)
+
+If you perform a ``` nslookup kubetest.alonsobm.com``` You will see the same ip shown in the image.
+
 Unit tests are not included due to the amount of time that would require test all the different parts of the app. Integration/Acceptance test are included under 
 todoapp/tests dir. I am using a TestMain function that runs before the tests, and then performing the tests against the app with a postgres container behind.
 
