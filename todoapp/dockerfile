@@ -1,0 +1,14 @@
+FROM golang:1.19.3-alpine3.17  as builder
+
+WORKDIR /app
+
+COPY  . .
+
+RUN go build todoapp/cmd/main.go
+RUN mv main /usr/local/bin
+
+FROM alpine:3.17
+WORKDIR /app/
+COPY --from=builder /usr/local/bin/main ./
+COPY --from=builder /app/config/local.json ./config/
+CMD ["./main"]

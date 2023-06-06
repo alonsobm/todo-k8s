@@ -1,0 +1,56 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Cloning repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Integration Test
+        run: |
+          make test.integration
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_TOKEN }}
+
+      - name: Build container image
+        run: |
+          docker build -f todoapp/dockerfile -t registry.digitalocean.com/alonsoregistry/todoapp:$(echo $GITHUB_SHA | head -c7) .
+
+      - name: Log in DigitalOcean Container Registry
+        run: |
+          doctl registry login --expiry-seconds 1200
+
+      - name: Push image to DigitalOcean Container Registry
+        run: | 
+          docker push registry.digitalocean.com/alonsoregistry/todoapp:$(echo $GITHUB_SHA | head -c7)
+
+      - name: Update deployment file
+        run: | 
+          TAG=$(echo $GITHUB_SHA | head -c7) && \
+          sed -i 's|<IMAGE>|registry.digitalocean.com/alonsoregistry/todoapp:'${TAG}'|' $GITHUB_WORKSPACE/manifests/deployment.yaml
+
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: |
+          doctl kubernetes cluster kubeconfig save --expiry-seconds 600 k8s-1-26-3-do-0-lon1-1685137993525-alonso
+
+      - name: Deploy to DigitalOcean Kubernetes
+        run: |
+          kubectl apply -f $GITHUB_WORKSPACE/manifests/deployment.yaml
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/todo-deployment
