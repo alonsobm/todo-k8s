@@ -19,6 +19,7 @@ Tests: There are integration/acceptance tests under todoapp/tests/ dir, you can 
 
 CI/CD: github actions yml is under .github/workflows/ dir. It is triggered on push to master
 
+Postman: postman collection was included under postman/ dir, It is a json that you can import to your postman
 
 ## Decisions
 
@@ -47,11 +48,13 @@ inject it to the HttpHandlers (or future CLI / GRPC  "handlers") I have.
 ## Improvements
 
 Due to time, I think there are several improvements that can be done to the app, like JSON validation, which I am not doing,use https and create ssl certificates via let's
-encrypt, improve the error handling via creating different errors. Other missing feature is shutdown process, which for an environment like kubernetes, where pods are going up and down,
+encrypt, improve the error handling via creating different errors, and inform the client what was happened. 
+
+Other missing feature is shutdown process, which for an environment like kubernetes, where pods are going up and down,
 is important to ensure the finish pending requests, We can create a channel to receive OS signals, spin up the http server in other goroutine and wait to receive a signal from that 
 channel, and then shutdown the httpServer. In some cases, I am passing up the error so the client can read some SQL errors, that should not. High availability in the server is 
 achieved since I have configured the Kubernetes cluster with two nodes, but not in db, that can be solved configuring the managed Postgres service that Digital Ocean
-have. A swagger can also be nice to have in order to interact with the server, but again
+have. A swagger can also be nice to have in order to interact with the server, but again, time is necessary for this.
 
 
 
