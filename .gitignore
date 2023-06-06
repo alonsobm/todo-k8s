@@ -1,0 +1,4 @@
+.idea
+build
+config/prod.json
+manifests/configmap.yaml
